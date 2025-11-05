@@ -1,0 +1,31 @@
+name: users
+description: "To Do - Plataforma de contratación de servicios"
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  english_words: ^4.0.0
+  provider: ^6.1.5
+  audioplayers: ^6.0.0
+  intl_phone_field: ^3.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: TitanOne
+      fonts:
+        - asset: assets/fonts/TitanOne-Regular.ttf
+  assets:
+    - assets/images/
+    - assets/images/logos/
+    - assets/sounds/entrada.mp3
