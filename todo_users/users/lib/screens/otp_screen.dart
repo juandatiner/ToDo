@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class OtpScreen extends StatefulWidget {
   final String phoneNumber;
@@ -201,6 +202,9 @@ class _OtpScreenState extends State<OtpScreen> {
                             borderSide: const BorderSide(color: Color(0xFF78BF32), width: 3),
                           ),
                         ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                        ],
                         onChanged: (value) => _onOtpChanged(value, index),
                       ),
                     );

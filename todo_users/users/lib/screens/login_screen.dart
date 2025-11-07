@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'otp_screen.dart';
 
@@ -188,6 +189,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         return null;
                       },
                       invalidNumberMessage: '',
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'[0-9+\-\s]')),
+                      ],
                     ),
                     const SizedBox(height: 24),
 
