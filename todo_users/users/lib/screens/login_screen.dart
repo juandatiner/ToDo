@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'otp_screen.dart';
+import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,11 +46,11 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = false;
       });
 
-      // Navegar a la pantalla de verificación OTP
+      // Navegar a la pantalla principal
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => OtpScreen(phoneNumber: _completePhoneNumber),
+          builder: (context) => const HomeScreen(),
         ),
       );
     } else {
