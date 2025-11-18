@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -13,23 +12,23 @@ class LoginScreen extends StatefulWidget {
 // Estado del LoginScreen
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
   bool _isLoading = false;
-  String _completePhoneNumber = '';
+  String _email = '';
 
   @override
   void dispose() {
-    _phoneController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      // Verificar que el campo de teléfono tenga contenido
-      if (_phoneController.text.isEmpty) {
+      // Verificar que el campo de email tenga contenido
+      if (_emailController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Por favor ingresa tu número de teléfono'),
+            content: Text('Por favor ingresa tu correo electrónico'),
             backgroundColor: Colors.red,
           ),
         );
@@ -40,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = true;
       });
 
-      // Simular envío de SMS
+      // Simular envío de email
       await Future.delayed(const Duration(seconds: 2));
 
       setState(() {
@@ -58,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Mostrar mensaje si la validación falla
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Ingresa un número de teléfono válido para continuar'),
+          content: Text('Ingresa un correo electrónico válido para continuar'),
           backgroundColor: Colors.red,
         ),
       );
@@ -141,11 +140,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 50),
 
-                    // Phone Number Field
-                    IntlPhoneField(
-                      controller: _phoneController,
+                    // Email Field
+                    TextFormField(
+                      controller: _emailController,
                       decoration: InputDecoration(
-                        labelText: 'Ingresa tu número móvil',
+                        labelText: 'Ingresa tu correo electrónico',
                         labelStyle: TextStyle(color: Colors.black.withOpacity(0.7)),
                         filled: true,
                         fillColor: Colors.white,
@@ -166,32 +165,24 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontSize: 14,
                         ),
                       ),
-                      initialCountryCode: 'CO',
-                      onChanged: (phone) {
+                      keyboardType: TextInputType.emailAddress,
+                      onChanged: (value) {
                         setState(() {
-                          _completePhoneNumber = '${phone.countryCode} ${phone.number}';
+                          _email = value;
                         });
-                        print('${phone.countryCode} ${phone.number}');
                       },
                       validator: (value) {
-                        if (value == null || value.number.isEmpty) {
+                        if (value == null || value.isEmpty) {
                           return null; // Dejar que el SnackBar maneje este caso
                         }
-                        if (value.number.length < 7) {
-                          return null; // Dejar que el SnackBar maneje este caso
-                        }
-                        if (value.number.length > 15) {
-                          return null; // Dejar que el SnackBar maneje este caso
-                        }
-                        // Validación básica de formato
-                        if (!RegExp(r'^[0-9+\-\s]+$').hasMatch(value.number)) {
-                          return null; // Dejar que el SnackBar maneje este caso
+                        // Validación básica de email
+                        if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                          return 'Ingresa un correo electrónico válido';
                         }
                         return null;
                       },
-                      invalidNumberMessage: '',
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9+\-\s]')),
+                        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9@._-]')),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -278,25 +269,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    ElevatedButton.icon(
-                      onPressed: _loginWithEmail,
-                      icon: Image.asset(
-                        'assets/images/logos/email_logo.png',
-                        height: 24,
-                        width: 24,
-                      ),
-                      label: const Text('Continuar con email'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF595959),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 4,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
 
                     ElevatedButton.icon(
                       onPressed: _loginWithFacebook,
