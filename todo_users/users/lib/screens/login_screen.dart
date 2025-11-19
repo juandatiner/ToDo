@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'otp_screen.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -12,9 +15,9 @@ class LoginScreen extends StatefulWidget {
 // Estado del LoginScreen
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _emailController = TextEditingController(text: 'cosmodavid2009@gmail.com');
   bool _isLoading = false;
-  String _email = '';
+  String _email = 'cosmodavid2009@gmail.com';
 
   @override
   void dispose() {
@@ -39,20 +42,41 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = true;
       });
 
-      // Simular envío de email
-      await Future.delayed(const Duration(seconds: 2));
+      try {
+        final response = await http.post(
+          Uri.parse('http://10.151.101.23:3000/send-otp'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'email': _emailController.text}),
+        ).timeout(const Duration(seconds: 10));
 
-      setState(() {
-        _isLoading = false;
-      });
-
-      // Navegar a la pantalla principal
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const HomeScreen(),
-        ),
-      );
+        if (response.statusCode == 200) {
+          // Navegar a la pantalla OTP
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OtpScreen(email: _emailController.text),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Error enviando el código de verificación'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error de conexión. Verifica tu conexión a internet.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } else {
       // Mostrar mensaje si la validación falla
       ScaffoldMessenger.of(context).showSnackBar(
@@ -69,16 +93,6 @@ class _LoginScreenState extends State<LoginScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Login con Google - Próximamente'),
-        backgroundColor: Colors.blue,
-      ),
-    );
-  }
-
-  void _loginWithEmail() {
-    // Implementar login con email
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Login con Email - Próximamente'),
         backgroundColor: Colors.blue,
       ),
     );
@@ -143,6 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Email Field
                     TextFormField(
                       controller: _emailController,
+                      autofocus: true,
                       decoration: InputDecoration(
                         labelText: 'Ingresa tu correo electrónico',
                         labelStyle: TextStyle(color: Colors.black.withOpacity(0.7)),
