@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'home_screen.dart';
+import 'verification_success_screen.dart';
 
 class OtpScreen extends StatefulWidget {
   final String email;
@@ -91,7 +91,7 @@ class _OtpScreenState extends State<OtpScreen> {
         // OTP verificado exitosamente
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => VerificationSuccessScreen(email: widget.email)),
         );
       } else {
         final error = jsonDecode(response.body)['error'];

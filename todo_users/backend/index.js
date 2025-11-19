@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const mailgun = require('mailgun-js');
+const sqlite3 = require('sqlite3').verbose();
 require('dotenv').config();
 
 const app = express();
@@ -19,6 +20,28 @@ app.use(express.json());
 // Almacenamiento temporal de OTPs (en producción usar Redis o DB)
 const otpStore = new Map();
 
+// Base de datos SQLite
+const db = new sqlite3.Database('./users.db', (err) => {
+  if (err) {
+    console.error('Error abriendo DB:', err.message);
+  } else {
+    console.log('Conectado a SQLite DB.');
+    db.run(`CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT UNIQUE NOT NULL,
+      nombre TEXT NOT NULL,
+      apellido TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`, (err) => {
+      if (err) {
+        console.error('Error creando tabla:', err);
+      } else {
+        console.log('Tabla users verificada/creada.');
+      }
+    });
+  }
+});
+
 // Generar OTP de 6 dígitos
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -35,6 +58,12 @@ app.post('/send-otp', async (req, res) => {
   const otp = generateOTP();
   otpStore.set(email, { otp, timestamp: Date.now() });
 
+  // Modo desarrollo: simular envío
+  if (process.env.DEV_MODE === 'true') {
+    console.log(`🔥 MODO DESARROLLO - Código OTP para ${email}: ${otp}`);
+    console.log(`📧 Este código expira en 10 minutos`);
+    return res.json({ message: 'OTP enviado exitosamente (modo desarrollo)' });
+  }
 
   // Modo producción: enviar email real
   const data = {
@@ -101,6 +130,45 @@ app.post('/verify-otp', (req, res) => {
   } else {
     res.status(400).json({ error: 'OTP inválido' });
   }
+});
+
+// Endpoint para verificar si usuario existe
+app.post('/check-user', (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: 'Email es requerido' });
+  }
+
+  db.get(`SELECT id, nombre, apellido FROM users WHERE email = ?`, [email], (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error verificando usuario' });
+    }
+    if (row) {
+      res.json({ exists: true, user: row });
+    } else {
+      res.json({ exists: false });
+    }
+  });
+});
+
+// Endpoint para registrar usuario
+app.post('/register-user', (req, res) => {
+  const { email, nombre, apellido } = req.body;
+
+  if (!email || !nombre || !apellido) {
+    return res.status(400).json({ error: 'Email, nombre y apellido son requeridos' });
+  }
+
+  db.run(`INSERT INTO users (email, nombre, apellido) VALUES (?, ?, ?)`, [email, nombre, apellido], function(err) {
+    if (err) {
+      if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+        return res.status(400).json({ error: 'Usuario ya registrado' });
+      }
+      return res.status(500).json({ error: 'Error registrando usuario' });
+    }
+    res.json({ message: 'Usuario registrado exitosamente', id: this.lastID });
+  });
 });
 
 app.listen(PORT, '0.0.0.0', () => {
