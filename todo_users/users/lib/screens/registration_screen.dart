@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../config.dart';
-import 'home_screen.dart';
+import 'verification_success_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final String email;
@@ -47,7 +47,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       if (response.statusCode == 200) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(
+            builder: (context) => VerificationSuccessScreen(
+              email: widget.email,
+              isAfterRegistration: true,
+            ),
+          ),
         );
       } else {
         final error = jsonDecode(response.body)['error'];

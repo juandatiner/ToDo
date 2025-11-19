@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../config.dart';
 import 'verification_success_screen.dart';
+import 'registration_screen.dart';
 
 class OtpScreen extends StatefulWidget {
   final String email;
@@ -63,6 +64,45 @@ class _OtpScreenState extends State<OtpScreen> {
 
   String get _otpCode => _controllers.map((c) => c.text).join();
 
+  Future<void> _checkUserAfterOtp() async {
+    try {
+      final response = await http.post(
+        Uri.parse('${Config.baseUrl}/check-user'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': widget.email}),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['exists']) {
+          // Usuario existe, ir a verificación exitosa
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => VerificationSuccessScreen(email: widget.email)),
+          );
+        } else {
+          // Usuario no existe, ir a registro
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => RegistrationScreen(email: widget.email)),
+          );
+        }
+      } else {
+        // Error, asumir no existe
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => RegistrationScreen(email: widget.email)),
+        );
+      }
+    } catch (e) {
+      // Error de conexión, asumir no existe
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => RegistrationScreen(email: widget.email)),
+      );
+    }
+  }
+
   Future<void> _verifyOtp() async {
     if (_otpCode.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -90,10 +130,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
       if (response.statusCode == 200) {
         // OTP verificado exitosamente
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => VerificationSuccessScreen(email: widget.email)),
-        );
+        _checkUserAfterOtp();
       } else {
         final error = jsonDecode(response.body)['error'];
         ScaffoldMessenger.of(context).showSnackBar(

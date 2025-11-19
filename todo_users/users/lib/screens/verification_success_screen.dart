@@ -8,8 +8,13 @@ import 'home_screen.dart';
 
 class VerificationSuccessScreen extends StatefulWidget {
   final String email;
+  final bool isAfterRegistration;
 
-  const VerificationSuccessScreen({super.key, required this.email});
+  const VerificationSuccessScreen({
+    super.key,
+    required this.email,
+    this.isAfterRegistration = false,
+  });
 
   @override
   State<VerificationSuccessScreen> createState() => _VerificationSuccessScreenState();
@@ -20,7 +25,14 @@ class _VerificationSuccessScreenState extends State<VerificationSuccessScreen> {
   void initState() {
     super.initState();
     Timer(const Duration(seconds: 2), () {
-      _checkUser();
+      if (widget.isAfterRegistration) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } else {
+        _checkUser();
+      }
     });
   }
 
