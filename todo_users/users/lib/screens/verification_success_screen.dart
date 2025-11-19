@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
+import '../config.dart';
 import 'registration_screen.dart';
 import 'home_screen.dart';
 
@@ -26,7 +27,7 @@ class _VerificationSuccessScreenState extends State<VerificationSuccessScreen> {
   Future<void> _checkUser() async {
     try {
       final response = await http.post(
-        Uri.parse('http://10.151.101.23:3000/check-user'),
+        Uri.parse('${Config.baseUrl}/check-user'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': widget.email}),
       ).timeout(const Duration(seconds: 10));

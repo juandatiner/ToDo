@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config.dart';
 import 'home_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -34,7 +35,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.151.101.23:3000/register-user'),
+        Uri.parse('${Config.baseUrl}/register-user'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': widget.email,

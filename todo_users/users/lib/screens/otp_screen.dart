@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config.dart';
 import 'verification_success_screen.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -79,7 +80,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.151.101.23:3000/verify-otp'),
+        Uri.parse('${Config.baseUrl}/verify-otp'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': widget.email,
@@ -127,7 +128,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.151.101.23:3000/send-otp'),
+        Uri.parse('${Config.baseUrl}/send-otp'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': widget.email}),
       ).timeout(const Duration(seconds: 10));

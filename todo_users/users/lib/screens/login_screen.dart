@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config.dart';
 import 'otp_screen.dart';
 import 'home_screen.dart';
 
@@ -44,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       try {
         final response = await http.post(
-          Uri.parse('http://10.151.101.23:3000/send-otp'),
+          Uri.parse('${Config.baseUrl}/send-otp'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'email': _emailController.text}),
         ).timeout(const Duration(seconds: 10));
