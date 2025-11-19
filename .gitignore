@@ -1,1 +1,4 @@
-node_modules
+# Archivos con claves privadas
+.env
+*.env
+todo_users/backend/.env
