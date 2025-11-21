@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../config.dart';
 import '../models/service.dart';
+import 'all_services_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +19,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int _newServicesCurrentPage = 0;
   int _selectedIndex = 0;
   List<Service> _services = [];
+  List<Service> _suggestedServices = [];
+  List<Service> _newServices = [];
 
   @override
   void initState() {
@@ -60,6 +63,8 @@ class _HomeScreenState extends State<HomeScreen> {
         final List<dynamic> servicesJson = data['services'];
         setState(() {
           _services = servicesJson.map((json) => Service.fromJson(json)).toList();
+          _newServices = _services.length > 5 ? _services.sublist(_services.length - 5) : _services;
+          _suggestedServices = List.from(_services)..shuffle()..take(5).toList();
         });
       } else {
         // Manejar error
@@ -133,7 +138,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       ElevatedButton(
                         onPressed: () {
-                          // Acción para explorar más servicios
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AllServicesScreen(services: _services),
+                            ),
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFE7E7E7),
@@ -154,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       controller: _suggestionsController,
                       itemCount: 5,
                       itemBuilder: (context, index) {
-                        final service = index < _services.length ? _services[index] : null;
+                        final service = index < _suggestedServices.length ? _suggestedServices[index] : null;
                         return Container(
                           margin: const EdgeInsets.symmetric(horizontal: 5),
                           decoration: BoxDecoration(
@@ -254,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       controller: _newServicesController,
                       itemCount: 5,
                       itemBuilder: (context, index) {
-                        final service = index < _services.length ? _services[index] : null;
+                        final service = index < _newServices.length ? _newServices[index] : null;
                         return Container(
                           margin: const EdgeInsets.symmetric(horizontal: 5),
                           decoration: BoxDecoration(

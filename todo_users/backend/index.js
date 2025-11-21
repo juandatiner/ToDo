@@ -57,24 +57,29 @@ const servicesDb = new sqlite3.Database('./services.db', (err) => {
         console.error('Error creando tabla services:', err);
       } else {
         console.log('Tabla services verificada/creada.');
-        // Insertar datos de ejemplo si la tabla está vacía
-        servicesDb.get(`SELECT COUNT(*) as count FROM services`, [], (err, row) => {
-          if (err) {
-            console.error('Error verificando datos:', err);
-          } else if (row.count === 0) {
-            const sampleServices = [
-              'Servicio de hogar',
-              'Reparaciones eléctricas',
-              'Jardinería',
-              'Limpieza',
-              'Plomería',
-            ];
-            sampleServices.forEach(name => {
+        // Insertar datos de ejemplo si no existen
+        const sampleServices = [
+          'Servicio de hogar',
+          'Reparaciones eléctricas',
+          'Jardinería',
+          'Limpieza',
+          'Plomería',
+          'Pintura',
+          'Carpintería',
+          'Electricidad',
+          'Fontanería',
+          'Mantenimiento general',
+        ];
+        sampleServices.forEach(name => {
+          servicesDb.get(`SELECT id FROM services WHERE name = ?`, [name], (err, row) => {
+            if (err) {
+              console.error('Error verificando servicio:', err);
+            } else if (!row) {
               servicesDb.run(`INSERT INTO services (name) VALUES (?)`, [name]);
-            });
-            console.log('Datos de ejemplo insertados en services.');
-          }
+            }
+          });
         });
+        console.log('Verificación de datos de ejemplo completada.');
       }
     });
   }
