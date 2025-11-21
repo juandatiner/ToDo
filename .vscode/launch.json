@@ -4,6 +4,7 @@
     // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
             "name": "users",
             "cwd": "todo_users/users",
@@ -20,6 +21,26 @@
         {
             "name": "users (release mode)",
             "cwd": "todo_users/users",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "allies",
+            "cwd": "todo_allies/allies",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "allies (profile mode)",
+            "cwd": "todo_allies/allies",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "allies (release mode)",
+            "cwd": "todo_allies/allies",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
