@@ -20,12 +20,12 @@ app.use(express.json());
 // Almacenamiento temporal de OTPs (en producción usar Redis o DB)
 const otpStore = new Map();
 
-// Base de datos SQLite
+// Base de datos SQLite para usuarios
 const db = new sqlite3.Database('./users.db', (err) => {
   if (err) {
-    console.error('Error abriendo DB:', err.message);
+    console.error('Error abriendo DB usuarios:', err.message);
   } else {
-    console.log('Conectado a SQLite DB.');
+    console.log('Conectado a SQLite DB usuarios.');
     db.run(`CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       email TEXT UNIQUE NOT NULL,
@@ -34,9 +34,47 @@ const db = new sqlite3.Database('./users.db', (err) => {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`, (err) => {
       if (err) {
-        console.error('Error creando tabla:', err);
+        console.error('Error creando tabla users:', err);
       } else {
         console.log('Tabla users verificada/creada.');
+      }
+    });
+  }
+});
+
+// Base de datos SQLite para servicios
+const servicesDb = new sqlite3.Database('./services.db', (err) => {
+  if (err) {
+    console.error('Error abriendo DB servicios:', err.message);
+  } else {
+    console.log('Conectado a SQLite DB servicios.');
+    servicesDb.run(`CREATE TABLE IF NOT EXISTS services (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`, (err) => {
+      if (err) {
+        console.error('Error creando tabla services:', err);
+      } else {
+        console.log('Tabla services verificada/creada.');
+        // Insertar datos de ejemplo si la tabla está vacía
+        servicesDb.get(`SELECT COUNT(*) as count FROM services`, [], (err, row) => {
+          if (err) {
+            console.error('Error verificando datos:', err);
+          } else if (row.count === 0) {
+            const sampleServices = [
+              'Servicio de hogar',
+              'Reparaciones eléctricas',
+              'Jardinería',
+              'Limpieza',
+              'Plomería',
+            ];
+            sampleServices.forEach(name => {
+              servicesDb.run(`INSERT INTO services (name) VALUES (?)`, [name]);
+            });
+            console.log('Datos de ejemplo insertados en services.');
+          }
+        });
       }
     });
   }
@@ -168,6 +206,16 @@ app.post('/register-user', (req, res) => {
       return res.status(500).json({ error: 'Error registrando usuario' });
     }
     res.json({ message: 'Usuario registrado exitosamente', id: this.lastID });
+  });
+});
+
+// Endpoint para obtener todos los servicios
+app.get('/services', (req, res) => {
+  servicesDb.all(`SELECT id, name FROM services ORDER BY created_at DESC`, [], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error obteniendo servicios' });
+    }
+    res.json({ services: rows });
   });
 });
 

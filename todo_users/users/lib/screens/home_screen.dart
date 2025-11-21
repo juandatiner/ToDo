@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../config.dart';
+import '../models/service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,6 +16,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final PageController _newServicesController = PageController();
   int _suggestionsCurrentPage = 0;
   int _newServicesCurrentPage = 0;
+  int _selectedIndex = 0;
+  List<Service> _services = [];
 
   @override
   void initState() {
@@ -26,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _newServicesCurrentPage = _newServicesController.page!.round();
       });
     });
+    _fetchServices();
   }
 
   @override
@@ -33,6 +40,34 @@ class _HomeScreenState extends State<HomeScreen> {
     _suggestionsController.dispose();
     _newServicesController.dispose();
     super.dispose();
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    // Navegación placeholder para otros índices
+    if (index != 0) {
+      // Navigator.push... para otras pantallas
+    }
+  }
+
+  Future<void> _fetchServices() async {
+    try {
+      final response = await http.get(Uri.parse('${Config.baseUrl}/services'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> servicesJson = data['services'];
+        setState(() {
+          _services = servicesJson.map((json) => Service.fromJson(json)).toList();
+        });
+      } else {
+        // Manejar error
+        print('Error fetching services: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
   @override
@@ -119,6 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       controller: _suggestionsController,
                       itemCount: 5,
                       itemBuilder: (context, index) {
+                        final service = index < _services.length ? _services[index] : null;
                         return Container(
                           margin: const EdgeInsets.symmetric(horizontal: 5),
                           decoration: BoxDecoration(
@@ -139,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 flex: 1,
                                 child: Container(
                                   decoration: const BoxDecoration(
-                                    color: Colors.blue, // Placeholder para imagen
+                                    color: Colors.blue, // Placeholder
                                     borderRadius: BorderRadius.only(
                                       topLeft: Radius.circular(10),
                                       bottomLeft: Radius.circular(10),
@@ -160,10 +196,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: const [
+                                    children: [
                                       Text(
-                                        'Servicio de hogar',
-                                        style: TextStyle(
+                                        service?.name ?? 'Servicio de hogar',
+                                        style: const TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -198,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Sección Nuevos Servicios
                   Row(
                     children: const [
-                      Text('🚀', style: TextStyle(fontSize: 24)),
+                      Text('🎉', style: TextStyle(fontSize: 24)),
                       SizedBox(width: 8),
                       Text(
                         'Nuevos Servicios',
@@ -218,6 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       controller: _newServicesController,
                       itemCount: 5,
                       itemBuilder: (context, index) {
+                        final service = index < _services.length ? _services[index] : null;
                         return Container(
                           margin: const EdgeInsets.symmetric(horizontal: 5),
                           decoration: BoxDecoration(
@@ -238,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 flex: 1,
                                 child: Container(
                                   decoration: const BoxDecoration(
-                                    color: Colors.green, // Placeholder para imagen
+                                    color: Colors.green, // Placeholder
                                     borderRadius: BorderRadius.only(
                                       topLeft: Radius.circular(10),
                                       bottomLeft: Radius.circular(10),
@@ -259,10 +296,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: const [
+                                    children: [
                                       Text(
-                                        'Servicio de hogar',
-                                        style: TextStyle(
+                                        service?.name ?? 'Servicio de hogar',
+                                        style: const TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -293,11 +330,98 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     }),
                   ),
+                  const SizedBox(height: 30),
+                  // Sección "¿No encuentras lo que buscas?"
+                  Container(
+                    padding: const EdgeInsets.all(12.0),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE7E7E7), // Color #E7E7E7
+                      borderRadius: BorderRadius.circular(20.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text(
+                          '¿No encuentras lo que buscas?',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Publica tu solicitud y deja que los expertos vengan a ti. No pierdas tiempo buscando, ¡ellos te encontrarán!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Acción para publicar solicitud
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF78BF32), // Verde #78BF32
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            elevation: 5,
+                          ),
+                          child: const Text(
+                            'Publicar',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Inicio',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.message),
+            label: 'Mensajes',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.work),
+            label: 'Servicios',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Perfil',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        elevation: 10,
       ),
     );
   }
