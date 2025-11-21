@@ -21,7 +21,7 @@ app.use(express.json());
 const otpStore = new Map();
 
 // Base de datos SQLite para usuarios
-const db = new sqlite3.Database('./users.db', (err) => {
+const db = new sqlite3.Database('../../databases/users.db', (err) => {
   if (err) {
     console.error('Error abriendo DB usuarios:', err.message);
   } else {
@@ -43,7 +43,7 @@ const db = new sqlite3.Database('./users.db', (err) => {
 });
 
 // Base de datos SQLite para servicios
-const servicesDb = new sqlite3.Database('./services.db', (err) => {
+const servicesDb = new sqlite3.Database('../../databases/services.db', (err) => {
   if (err) {
     console.error('Error abriendo DB servicios:', err.message);
   } else {
